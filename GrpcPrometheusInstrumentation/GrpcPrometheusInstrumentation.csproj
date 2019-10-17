@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Version>0.0.1-alpha</Version>
+    <PackageId>Com.RFranco.Instrumentation.Prometheus</PackageId>
+    <Title>HttpActuator</Title>
+    <Description>gRPC Prometheus client - server instrumentation for DotNet.</Description>
+    <Authors>Ruben Martinez; Javier solana</Authors>
+    <Copyright>Copyright R.Franco Technologies 2019</Copyright>
+    <PackageTags>gRPC Instrumentation Prometheus DotNet Metrics</PackageTags>
+    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/rfrancotechnologies/grpc-prometheus-instrumentation</PackageProjectUrl>
+    <IncludeSource>false</IncludeSource>
+    <PackageReleaseNotes>
+      First version.
+    </PackageReleaseNotes>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Grpc" Version="2.24.0" />
+    <PackageReference Include="prometheus-net" Version="3.2.1" />
+  </ItemGroup>
+</Project>
