@@ -9,7 +9,9 @@ namespace Com.Rfranco.Instrumentation.Prometheus
     {
         private static readonly Counter RequestsProcessed = Metrics.CreateCounter("requests_processed_total", "Number of processed request.", "method");
         private static readonly Counter ErrorRequestsProcessed = Metrics.CreateCounter("requests_error_total", "Number of errors processing request.", "method", "error_code");
+        private static readonly Gauge OngoingRequests = Metrics.CreateGauge("requests_in_progress", "Number of ongoing requests.", "method");
         private static readonly Summary RequestDurationSummaryInSeconds = Metrics.CreateSummary("requests_duration_summary_seconds", "A Summary of request duration (in seconds) over last 10 minutes.", "method");
+        private static readonly Histogram RequestResponseHistogram = Metrics.CreateHistogram("requests_duration_histogram_seconds", "Histogram of request duration in seconds.", "method");
 
         public PrometheusServerInterceptor()
         {
@@ -17,87 +19,101 @@ namespace Com.Rfranco.Instrumentation.Prometheus
         public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
         {
             var method = context.Method.Split('/')[2];
-            using (RequestDurationSummaryInSeconds.Labels(method).NewTimer())
-            {
-                try
-                {
-                    return await continuation(request, context);
-                }
-                catch (RpcException e)
-                {
-                    ErrorRequestsProcessed.Labels(method, e.StatusCode.ToString()).Inc();
-                    throw;
-                }
-                finally
-                {
-                    RequestsProcessed.Labels(method).Inc();
-                }
-            }
+            OngoingRequests.Labels(method).Inc();
 
+            using (RequestResponseHistogram.Labels(method).NewTimer())
+                using (RequestDurationSummaryInSeconds.Labels(method).NewTimer())
+                {                
+                    try
+                    {
+                        return await continuation(request, context);
+                    }
+                    catch (RpcException e)
+                    {
+                        ErrorRequestsProcessed.Labels(method, e.StatusCode.ToString()).Inc();
+                        throw;
+                    }
+                    finally
+                    {
+                        RequestsProcessed.Labels(method).Inc();
+                        OngoingRequests.Labels(method).Dec();
+                    }
+                }
         }
-
 
         public override Task<TResponse> ClientStreamingServerHandler<TRequest, TResponse>(IAsyncStreamReader<TRequest> requestStream, ServerCallContext context, ClientStreamingServerMethod<TRequest, TResponse> continuation)
         {
             var method = context.Method.Split('/')[2];
-            using (RequestDurationSummaryInSeconds.Labels(method).NewTimer())
-            {
-                try
+            OngoingRequests.Labels(method).Inc();
+
+            using (RequestResponseHistogram.Labels(method).NewTimer())
+                using (RequestDurationSummaryInSeconds.Labels(method).NewTimer())
                 {
-                    return continuation(requestStream, context);
+                    try
+                    {
+                        return continuation(requestStream, context);
+                    }
+                    catch (RpcException e)
+                    {
+                        ErrorRequestsProcessed.Labels(method, e.StatusCode.ToString()).Inc();
+                        throw;
+                    }
+                    finally
+                    {
+                        RequestsProcessed.Labels(method).Inc();
+                        OngoingRequests.Labels(method).Dec();
+                    }
                 }
-                catch (RpcException e)
-                {
-                    ErrorRequestsProcessed.Labels(method, e.StatusCode.ToString()).Inc();
-                    throw;
-                }
-                finally
-                {
-                    RequestsProcessed.Labels(method).Inc();
-                }
-            }
         }
 
         public override Task ServerStreamingServerHandler<TRequest, TResponse>(TRequest request, IServerStreamWriter<TResponse> responseStream, ServerCallContext context, ServerStreamingServerMethod<TRequest, TResponse> continuation)
         {
             var method = context.Method.Split('/')[2];
-            using (RequestDurationSummaryInSeconds.Labels(method).NewTimer())
-            {
-                try
+            OngoingRequests.Labels(method).Inc();
+
+            using (RequestResponseHistogram.Labels(method).NewTimer())
+                using (RequestDurationSummaryInSeconds.Labels(method).NewTimer())
                 {
-                    return continuation(request, responseStream, context);
+                    try
+                    {
+                        return continuation(request, responseStream, context);
+                    }
+                    catch (RpcException e)
+                    {
+                        ErrorRequestsProcessed.Labels(method, e.StatusCode.ToString()).Inc();
+                        throw;
+                    }
+                    finally
+                    {
+                        RequestsProcessed.Labels(method).Inc();
+                        OngoingRequests.Labels(method).Dec();
+                    }
                 }
-                catch (RpcException e)
-                {
-                    ErrorRequestsProcessed.Labels(method, e.StatusCode.ToString()).Inc();
-                    throw;
-                }
-                finally
-                {
-                    RequestsProcessed.Labels(method).Inc();
-                }
-            }
         }
 
         public override Task DuplexStreamingServerHandler<TRequest, TResponse>(IAsyncStreamReader<TRequest> requestStream, IServerStreamWriter<TResponse> responseStream, ServerCallContext context, DuplexStreamingServerMethod<TRequest, TResponse> continuation)
         {
             var method = context.Method.Split('/')[2];
-            using (RequestDurationSummaryInSeconds.Labels(method).NewTimer())
-            {
-                try
+            OngoingRequests.Labels(method).Inc();
+
+            using (RequestResponseHistogram.Labels(method).NewTimer())
+                using (RequestDurationSummaryInSeconds.Labels(method).NewTimer())
                 {
-                    return continuation(requestStream, responseStream, context);
+                    try
+                    {
+                        return continuation(requestStream, responseStream, context);
+                    }
+                    catch (RpcException e)
+                    {
+                        ErrorRequestsProcessed.Labels(method, e.StatusCode.ToString()).Inc();
+                        throw;
+                    }
+                    finally
+                    {
+                        RequestsProcessed.Labels(method).Inc();
+                        OngoingRequests.Labels(method).Dec();
+                    }
                 }
-                catch (RpcException e)
-                {
-                    ErrorRequestsProcessed.Labels(method, e.StatusCode.ToString()).Inc();
-                    throw;
-                }
-                finally
-                {
-                    RequestsProcessed.Labels(method).Inc();
-                }
-            }
         }
     }
 }
