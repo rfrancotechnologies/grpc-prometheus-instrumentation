@@ -7,14 +7,19 @@ namespace Com.Rfranco.Instrumentation.Prometheus
 {
     public class PrometheusServerInterceptor : Interceptor
     {
-        private static readonly Counter RequestsProcessed = Metrics.CreateCounter("requests_processed_total", "Number of processed request.", "method");
-        private static readonly Counter ErrorRequestsProcessed = Metrics.CreateCounter("requests_error_total", "Number of errors processing request.", "method", "error_code");
-        private static readonly Gauge OngoingRequests = Metrics.CreateGauge("requests_in_progress", "Number of ongoing requests.", "method");
-        private static readonly Summary RequestDurationSummaryInSeconds = Metrics.CreateSummary("requests_duration_summary_seconds", "A Summary of request duration (in seconds) over last 10 minutes.", "method");
-        private static readonly Histogram RequestResponseHistogram = Metrics.CreateHistogram("requests_duration_histogram_seconds", "Histogram of request duration in seconds.", "method");
+        private Counter RequestsProcessed;
+        private Counter ErrorRequestsProcessed;
+        private Gauge OngoingRequests;
+        private Summary RequestDurationSummaryInSeconds;
+        private Histogram RequestResponseHistogram;
 
-        public PrometheusServerInterceptor()
+        public PrometheusServerInterceptor(string prefix = "server")
         {
+            RequestsProcessed = Metrics.CreateCounter($"{prefix}_grpc_requests_total", "Number of processed request.", "method");
+            ErrorRequestsProcessed = Metrics.CreateCounter($"{prefix}_grpc_error_total", "Number of errors processing request.", "method", "error_code");
+            OngoingRequests = Metrics.CreateGauge($"{prefix}_grpc_requests_in_progress", "Number of ongoing requests.", "method");
+            RequestDurationSummaryInSeconds = Metrics.CreateSummary($"{prefix}_grpc_requests_duration_summary_seconds", "A Summary of request duration (in seconds) over last 10 minutes.", "method");
+            RequestResponseHistogram = Metrics.CreateHistogram($"{prefix}_grpc_requests_duration_histogram_seconds", "Histogram of request duration in seconds.", "method");
         }
         public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
         {
