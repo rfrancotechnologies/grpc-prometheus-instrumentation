@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <PackageId>Com.RFranco.Grpc.Prometheus</PackageId>
     <Title>GrpcPrometheusInstrumentation</Title>
     <Description>gRPC Prometheus client - server instrumentation for DotNet.</Description>
@@ -10,9 +10,10 @@
     <PackageTags>gRPC Instrumentation Prometheus DotNet Metrics</PackageTags>
     <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/rfrancotechnologies/grpc-prometheus-instrumentation</PackageProjectUrl>
+    <PackageIconUrl>http://www.rfranco.com/rfjobs/wp-content/uploads/2018/06/logo_pica_grupo.png</PackageIconUrl>
     <IncludeSource>false</IncludeSource>
     <PackageReleaseNotes>
-      Renamed custom metrics exposed(prefix customizable).
+      Removed redundant metrics.
     </PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
