@@ -6,23 +6,27 @@ namespace Com.Rfranco.Instrumentation.Prometheus
 {
     public class PrometheusClientInterceptor : Interceptor
     {
-        private Counter TotalResponses;
+        private Counter TotalErrors;
         private Gauge OngoingRequests;
         private Histogram RequestResponseHistogram;
 
+        private string ServiceName;
 
-        public PrometheusClientInterceptor(string prefix = "client")
+
+        public PrometheusClientInterceptor()
         {
-            TotalResponses = Metrics.CreateCounter($"{prefix}_grpc_error_total", "Number of errors processing request.", "method", "error_code");
-            OngoingRequests = Metrics.CreateGauge($"{prefix}_grpc_requests_in_progress", "Number of ongoing requests.", "method");
-            RequestResponseHistogram = Metrics.CreateHistogram($"{prefix}_grpc_requests_duration_histogram_seconds", "Histogram of request duration in seconds.", "method");
+            TotalErrors = Metrics.CreateCounter($"grpc_client_error_total", "Number of errors processing messages.", "service", "method", "error_code");
+            OngoingRequests = Metrics.CreateGauge($"grpc_client_msg_in_progress", "Number of ongoing messages.", "service", "method");
+            RequestResponseHistogram = Metrics.CreateHistogram($"grpc_client_msg_duration_histogram_seconds", "Histogram of messages duration in seconds.", "service", "method");
         }
         public override TResponse BlockingUnaryCall<TRequest, TResponse>(TRequest request, ClientInterceptorContext<TRequest, TResponse> context, BlockingUnaryCallContinuation<TRequest, TResponse> continuation)
         {
-            var method = context.Method.FullName.Split('/')[2];
-            OngoingRequests.Labels(method).Inc();
+            var info = context.Method.FullName.Split('/');
+            var service = info[1];
+            var method = info[2];
+            OngoingRequests.Labels(service, method).Inc();
 
-            using (RequestResponseHistogram.Labels(method).NewTimer())
+            using (RequestResponseHistogram.Labels(service, method).NewTimer())
             {
                 try
                 {
@@ -30,21 +34,23 @@ namespace Com.Rfranco.Instrumentation.Prometheus
                 }
                 catch (RpcException e)
                 {
-                    TotalResponses.Labels(method, e.StatusCode.ToString()).Inc();
+                    TotalErrors.Labels(service, method, e.StatusCode.ToString()).Inc();
                     throw;
                 }
                 finally
                 {
-                    OngoingRequests.Labels(method).Dec();
+                    OngoingRequests.Labels(service, method).Dec();
                 }
             }
         }
         public override AsyncUnaryCall<TResponse> AsyncUnaryCall<TRequest, TResponse>(TRequest request, ClientInterceptorContext<TRequest, TResponse> context, AsyncUnaryCallContinuation<TRequest, TResponse> continuation)
         {
-            var method = context.Method.FullName.Split('/')[2];
-            OngoingRequests.Labels(method).Inc();
+            var info = context.Method.FullName.Split('/');
+            var service = info[1];
+            var method = info[2];
+            OngoingRequests.Labels(service, method).Inc();
 
-            using (RequestResponseHistogram.Labels(method).NewTimer())
+            using (RequestResponseHistogram.Labels(service, method).NewTimer())
             {
                 try
                 {
@@ -52,21 +58,23 @@ namespace Com.Rfranco.Instrumentation.Prometheus
                 }
                 catch (RpcException e)
                 {
-                    TotalResponses.Labels(method, e.StatusCode.ToString()).Inc();
+                    TotalErrors.Labels(service, method, e.StatusCode.ToString()).Inc();
                     throw;
                 }
                 finally
                 {
-                    OngoingRequests.Labels(method).Dec();
+                    OngoingRequests.Labels(service, method).Dec();
                 }
             }
         }
         public override AsyncServerStreamingCall<TResponse> AsyncServerStreamingCall<TRequest, TResponse>(TRequest request, ClientInterceptorContext<TRequest, TResponse> context, AsyncServerStreamingCallContinuation<TRequest, TResponse> continuation)
         {
-            var method = context.Method.FullName.Split('/')[2];
-            OngoingRequests.Labels(method).Inc();
+            var info = context.Method.FullName.Split('/');
+            var service = info[1];
+            var method = info[2];
+            OngoingRequests.Labels(service, method).Inc();
 
-            using (RequestResponseHistogram.Labels(method).NewTimer())
+            using (RequestResponseHistogram.Labels(service, method).NewTimer())
             {
                 try
                 {
@@ -74,21 +82,23 @@ namespace Com.Rfranco.Instrumentation.Prometheus
                 }
                 catch (RpcException e)
                 {
-                    TotalResponses.Labels(method, e.StatusCode.ToString()).Inc();
+                    TotalErrors.Labels(service, method, e.StatusCode.ToString()).Inc();
                     throw;
                 }
                 finally
                 {
-                    OngoingRequests.Labels(method).Dec();
+                    OngoingRequests.Labels(service, method).Dec();
                 }
             }
         }
         public override AsyncClientStreamingCall<TRequest, TResponse> AsyncClientStreamingCall<TRequest, TResponse>(ClientInterceptorContext<TRequest, TResponse> context, AsyncClientStreamingCallContinuation<TRequest, TResponse> continuation)
         {
-            var method = context.Method.FullName.Split('/')[2];
-            OngoingRequests.Labels(method).Inc();
+            var info = context.Method.FullName.Split('/');
+            var service = info[1];
+            var method = info[2];
+            OngoingRequests.Labels(service, method).Inc();
 
-            using (RequestResponseHistogram.Labels(method).NewTimer())
+            using (RequestResponseHistogram.Labels(service, method).NewTimer())
             {
                 try
                 {
@@ -96,21 +106,23 @@ namespace Com.Rfranco.Instrumentation.Prometheus
                 }
                 catch (RpcException e)
                 {
-                    TotalResponses.Labels(method, e.StatusCode.ToString()).Inc();
+                    TotalErrors.Labels(service, method, e.StatusCode.ToString()).Inc();
                     throw;
                 }
                 finally
                 {
-                    OngoingRequests.Labels(method).Dec();
+                    OngoingRequests.Labels(service, method).Dec();
                 }
             }
         }
         public override AsyncDuplexStreamingCall<TRequest, TResponse> AsyncDuplexStreamingCall<TRequest, TResponse>(ClientInterceptorContext<TRequest, TResponse> context, AsyncDuplexStreamingCallContinuation<TRequest, TResponse> continuation)
         {
-            var method = context.Method.FullName.Split('/')[2];
-            OngoingRequests.Labels(method).Inc();
+            var info = context.Method.FullName.Split('/');
+            var service = info[1];
+            var method = info[2];
+            OngoingRequests.Labels(service, method).Inc();
 
-            using (RequestResponseHistogram.Labels(method).NewTimer())
+            using (RequestResponseHistogram.Labels(service, method).NewTimer())
             {
                 try
                 {
@@ -118,12 +130,12 @@ namespace Com.Rfranco.Instrumentation.Prometheus
                 }
                 catch (RpcException e)
                 {
-                    TotalResponses.Labels(method, e.StatusCode.ToString()).Inc();
+                    TotalErrors.Labels(service, method, e.StatusCode.ToString()).Inc();
                     throw;
                 }
                 finally
                 {
-                    OngoingRequests.Labels(method).Dec();
+                    OngoingRequests.Labels(service,method).Dec();
                 }
             }
         }
