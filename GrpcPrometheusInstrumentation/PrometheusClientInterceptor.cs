@@ -15,9 +15,9 @@ namespace Com.Rfranco.Instrumentation.Prometheus
 
         public PrometheusClientInterceptor()
         {
-            TotalErrors = Metrics.CreateCounter($"grpc_client_error_total", "Number of errors processing messages.", "service", "method", "error_code");
-            OngoingRequests = Metrics.CreateGauge($"grpc_client_msg_in_progress", "Number of ongoing messages.", "service", "method");
-            RequestResponseHistogram = Metrics.CreateHistogram($"grpc_client_msg_duration_histogram_seconds", "Histogram of messages duration in seconds.", "service", "method");
+            TotalErrors = Metrics.CreateCounter($"client_request_error_total", "Number of errors processing messages.", "service", "method", "error_code");
+            OngoingRequests = Metrics.CreateGauge($"client_request_in_progress", "Number of ongoing messages.", "service", "method");
+            RequestResponseHistogram = Metrics.CreateHistogram($"client_request_duration_seconds", "Histogram of messages duration in seconds.", "service", "method");
         }
         public override TResponse BlockingUnaryCall<TRequest, TResponse>(TRequest request, ClientInterceptorContext<TRequest, TResponse> context, BlockingUnaryCallContinuation<TRequest, TResponse> continuation)
         {

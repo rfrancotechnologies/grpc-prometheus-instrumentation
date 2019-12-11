@@ -13,9 +13,9 @@ namespace Com.Rfranco.Instrumentation.Prometheus
 
         public PrometheusServerInterceptor()
         {
-            ErrorRequestsProcessed = Metrics.CreateCounter($"grpc_server_error_total", "Number of errors processing messages.", "service","method", "error_code");
-            OngoingRequests = Metrics.CreateGauge($"grpc_server_msg_in_progress", "Number of ongoing messages.", "service", "method");
-            RequestResponseHistogram = Metrics.CreateHistogram($"grpc_server_msg_duration_histogram_seconds", "Histogram of message duration in seconds.", "service", "method");
+            ErrorRequestsProcessed = Metrics.CreateCounter($"server_request_error_total", "Number of errors processing messages.", "service","method", "error_code");
+            OngoingRequests = Metrics.CreateGauge($"server_request_in_progress", "Number of ongoing messages.", "service", "method");
+            RequestResponseHistogram = Metrics.CreateHistogram($"server_request_duration_seconds", "Histogram of message duration in seconds.", "service", "method");
         }
         public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
         {
