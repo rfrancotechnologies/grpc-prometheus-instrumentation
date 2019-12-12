@@ -9,15 +9,19 @@ namespace Com.Rfranco.Instrumentation.Prometheus
         private Counter TotalErrors;
         private Gauge OngoingRequests;
         private Histogram RequestResponseHistogram;
+        private PrometheusInterceptorOptions Options;
 
-        private string ServiceName;
 
-
-        public PrometheusClientInterceptor()
+        public PrometheusClientInterceptor(PrometheusInterceptorOptions options = null)
         {
-            TotalErrors = Metrics.CreateCounter($"client_request_error_total", "Number of errors processing messages.", "service", "method", "error_code");
-            OngoingRequests = Metrics.CreateGauge($"client_request_in_progress", "Number of ongoing messages.", "service", "method");
-            RequestResponseHistogram = Metrics.CreateHistogram($"client_request_duration_seconds", "Histogram of messages duration in seconds.", "service", "method");
+            Options = options ?? new PrometheusInterceptorOptions();
+            TotalErrors = Metrics.CreateCounter("client_request_error_total", "Number of errors processing messages.", "service", "method", "error_code");
+            OngoingRequests = Metrics.CreateGauge("client_request_in_progress", "Number of ongoing messages.", "service", "method");
+            RequestResponseHistogram = Metrics.CreateHistogram("client_request_duration_seconds", "Histogram of messages duration in seconds.",
+                new HistogramConfiguration() {
+                    LabelNames = new string[]{"service","method"},
+                    Buckets = Options.Buckets
+                });    
         }
         public override TResponse BlockingUnaryCall<TRequest, TResponse>(TRequest request, ClientInterceptorContext<TRequest, TResponse> context, BlockingUnaryCallContinuation<TRequest, TResponse> continuation)
         {

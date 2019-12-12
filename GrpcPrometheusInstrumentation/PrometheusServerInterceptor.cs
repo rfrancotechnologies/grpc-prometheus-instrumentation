@@ -10,12 +10,18 @@ namespace Com.Rfranco.Instrumentation.Prometheus
         private Counter ErrorRequestsProcessed;
         private Gauge OngoingRequests;
         private Histogram RequestResponseHistogram;
+        private PrometheusInterceptorOptions Options;
 
-        public PrometheusServerInterceptor()
+        public PrometheusServerInterceptor(PrometheusInterceptorOptions options = null)
         {
-            ErrorRequestsProcessed = Metrics.CreateCounter($"server_request_error_total", "Number of errors processing messages.", "service","method", "error_code");
-            OngoingRequests = Metrics.CreateGauge($"server_request_in_progress", "Number of ongoing messages.", "service", "method");
-            RequestResponseHistogram = Metrics.CreateHistogram($"server_request_duration_seconds", "Histogram of message duration in seconds.", "service", "method");
+            Options = options ?? new PrometheusInterceptorOptions();
+            ErrorRequestsProcessed = Metrics.CreateCounter("server_request_error_total", "Number of errors processing messages.", "service","method", "error_code");
+            OngoingRequests = Metrics.CreateGauge("server_request_in_progress", "Number of ongoing messages.", "service", "method");
+            RequestResponseHistogram = Metrics.CreateHistogram("server_request_duration_seconds", "Histogram of message duration in seconds.",
+                new HistogramConfiguration() {
+                    LabelNames = new string[]{"service","method"},
+                    Buckets = Options.Buckets
+                });
         }
         public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
         {

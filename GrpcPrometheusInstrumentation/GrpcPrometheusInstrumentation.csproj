@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-    <Version>0.0.6</Version>
+    <Version>0.0.7</Version>
     <PackageId>Com.RFranco.Grpc.Prometheus</PackageId>
     <Title>GrpcPrometheusInstrumentation</Title>
     <Description>gRPC Prometheus client - server instrumentation for DotNet.</Description>
@@ -13,7 +13,7 @@
     <PackageIconUrl>http://www.rfranco.com/rfjobs/wp-content/uploads/2018/06/logo_pica_grupo.png</PackageIconUrl>
     <IncludeSource>false</IncludeSource>
     <PackageReleaseNotes>
-      Metrics renamed.
+      Customize Buckets.
     </PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
